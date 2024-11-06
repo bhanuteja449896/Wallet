@@ -8,7 +8,7 @@ public class DbApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(DbApplication.class, args);
-		System.out.println("Server running on port 8080");
+		System.out.println("Server running on port 8080 ");
 	}
 
 }
