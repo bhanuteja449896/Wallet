@@ -51,27 +51,49 @@ public class WalletService {
         }
     }
 
-
     public PayResponse reqPay(PayReq req) {
         Wallet senderWallet = walletRepository.findByMobile(req.getSendMobile());
-        if (senderWallet != null && senderWallet.getPin().equals(req.getPin())) { // Check PIN for sender
+        Wallet receiverWallet = walletRepository.findByMobile(req.getReceiveMobile());
+
+        PayResponse response = new PayResponse();
+
+        // Check if the sender wallet exists and the sender's PIN is correct
+        if (senderWallet != null && senderWallet.getPin().equals(req.getPin())) {
+            // Check if the receiver wallet exists
+            if (receiverWallet == null) {
+                // Receiver wallet not found, return failure response
+                response.setRc("01");
+                response.setDes("failure");
+                return response;
+            }
+
+            // Check if sender has sufficient balance
             Integer debAmount = Integer.valueOf(senderWallet.getBalance()) - Integer.valueOf(req.getAmount());
             if (debAmount < 0) {
-                throw new RuntimeException("Insufficient balance"); // Handle insufficient funds
+                response.setRc("01");
+                response.setDes("Insufficient balance");
+                return response; // Handle insufficient funds
             }
+
+            // Deduct amount from sender's balance
             senderWallet.setBalance(String.valueOf(debAmount));
             walletRepository.save(senderWallet);
 
-            Wallet receiverWallet = walletRepository.findByMobile(req.getReceiveMobile());
-            if (receiverWallet != null) {
-                Integer amount = Integer.valueOf(receiverWallet.getBalance()) + Integer.valueOf(req.getAmount());
-                receiverWallet.setBalance(String.valueOf(amount));
-                walletRepository.save(receiverWallet);
-            }
+            // Add amount to receiver's balance
+            Integer amount = Integer.valueOf(receiverWallet.getBalance()) + Integer.valueOf(req.getAmount());
+            receiverWallet.setBalance(String.valueOf(amount));
+            walletRepository.save(receiverWallet);
+
+            // Successful payment response
+            response.setRc("00");
+            response.setDes("success");
         } else {
-            throw new RuntimeException("Invalid mobile or PIN for payment"); // Handle invalid case
+            // If the sender wallet is not found or PIN is incorrect
+            response.setRc("01");
+            response.setDes("Invalid mobile or PIN for payment");
         }
-        return new PayResponse();
+
+        return response;
     }
 
     public boolean checkMobile(String mobile) {

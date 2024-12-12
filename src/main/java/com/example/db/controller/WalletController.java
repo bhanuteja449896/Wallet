@@ -1,6 +1,6 @@
 package com.example.db.controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
 import com.example.db.service.WalletService;
 import com.example.db.vo.PayReq;
 import com.example.db.vo.PayResponse;
@@ -17,25 +17,24 @@ public class WalletController {
     WalletService walletService;
 
     @PostMapping("/add")
-    public WalletResp putUsers(@RequestBody WalletReq req){
+    public WalletResp putUsers(@RequestBody WalletReq req) {
         WalletResp walletResp = walletService.walletRegistration(req);
         return walletResp;
     }
-    
+
     @GetMapping("/balance/{mobile}")
-    public String getBalance(@PathVariable String mobile  ){
+    public String getBalance(@PathVariable String mobile) {
         return walletService.getBalanceByMobile(mobile);
     }
 
     @PostMapping("/payreq")
-    public PayResponse reqPay(@RequestBody PayReq req)  {
-        PayResponse response=walletService.reqPay(req);
+    public PayResponse reqPay(@RequestBody PayReq req) {
+        PayResponse response = walletService.reqPay(req);
         return response;
     }
 
     @PostMapping("/check-mobile")
-    public boolean checkMobile(@RequestParam String mobile){
+    public boolean checkMobile(@RequestParam String mobile) {
         return walletService.checkMobile(mobile);
     }
-
 }
